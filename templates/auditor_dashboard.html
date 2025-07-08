@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Кабинет аудитора</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #e0ecff, #ffffff);
+            min-height: 100vh;
+        }
+        .btn-compare {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-compare:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+        .logo-header {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .logo-header img {
+            height: 70px;
+        }
+        .logo-header h1 {
+            font-size: 1.3rem;
+            color: #003366;
+            margin-top: 10px;
+        }
+
+        /* === ИИ-чат стили === */
+        #ai-chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        #ai-chat-box {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            height: 400px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        #ai-chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+
+        #ai-chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        #ai-chat-input input {
+            flex: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="logo-header">
+            <img src="/static/logoKZ.png" alt="Логотип">
+            <h1>Абай Мырзахметов атындағы Көкшетау университеті</h1>
+        </div>
+
+        <h2 class="my-4 text-center">Кабинет аудитора</h2>
+
+        <form method="GET" action="/auditor/dashboard" class="card p-4 shadow-sm mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="selected_date" class="form-label">Дата:</label>
+                    <input type="date" class="form-control" id="selected_date" name="selected_date" value="{{ selected_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="teacher_id" class="form-label">Преподаватель:</label>
+                    <select class="form-select" id="teacher_id" name="teacher_id">
+                        <option value="">Выберите</option>
+                        {% for teacher in teachers %}
+                            <option value="{{ teacher.id }}" {% if teacher.id == selected_teacher_id %}selected{% endif %}>
+                                {{ teacher.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="subject_id" class="form-label">Предмет:</label>
+                    <select class="form-select" id="subject_id" name="subject_id">
+                        <option value="">Выберите</option>
+                        {% for subject in subjects %}
+                            <option value="{{ subject.id }}" {% if subject.id == selected_subject_id %}selected{% endif %}>
+                                {{ subject.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="group_id" class="form-label">Группа:</label>
+                    <select class="form-select" id="group_id" name="group_id">
+                        <option value="">Выберите</option>
+                        {% for group in groups %}
+                            <option value="{{ group.id }}" {% if group.id == selected_group_id %}selected{% endif %}>
+                                {{ group.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary px-5">Показать расписание</button>
+            </div>
+        </form>
+
+        {% if schedule %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Расписание на {{ selected_date }}</h4>
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Группа</th>
+                            <th>Предмет</th>
+                            <th>Время</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in schedule %}
+                        <tr>
+                            <td>{{ item.group_name }}</td>
+                            <td>{{ item.subject }}</td>
+                            <td>{{ item.start_time }}</td>
+                            <td>
+                                <a href="/auditor/view-teacher-attendance/{{ item.id }}" class="btn btn-info btn-sm">Посмотреть посещаемость преподавателя</a>
+                                <a href="/auditor/take-attendance/{{ item.id }}" class="btn btn-success btn-sm">Взять самостоятельную посещаемость</a>
+                                <a href="/auditor/compare/{{ item.id }}" class="btn btn-compare btn-sm">Сравнить посещаемости</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4 d-flex justify-content-center gap-3 flex-wrap">
+    <a href="/auditor/report" class="btn btn-warning px-4 py-2">📊 Анализ по преподавателю и предмету</a>
+    <a href="/ai/full" class="btn btn-dark px-4 py-2">🤖 Полная версия ИИ помощника</a>
+</div>
+    </div>
+
+    <!-- Кнопка ИИ -->
+<button id="ai-chat-button" class="btn btn-dark rounded-circle shadow-lg">
+    🤖
+</button>
+
+<!-- Окно чата -->
+<div id="ai-chat-box">
+    <div class="ai-chat-header">
+        🤖 ИИ Помощник
+    </div>
+    <div id="ai-chat-messages" class="ai-chat-messages"></div>
+    <div id="ai-chat-input">
+        <input type="text" id="ai-user-input" class="form-control" placeholder="Введите запрос...">
+        <button class="btn btn-primary" onclick="sendAiMessage()">Отправить</button>
+    </div>
+</div>
+
+<style>
+    #ai-chat-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+    }
+
+    #ai-chat-box {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 320px;
+        height: 0;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    #ai-chat-box.open {
+        height: 420px;
+        opacity: 1;
+    }
+
+    .ai-chat-header {
+        background: #007bff;
+        color: #fff;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1rem;
+        text-align: center;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .ai-chat-messages {
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+        background-color: #f9f9f9;
+    }
+
+    #ai-chat-input {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    #ai-chat-input input {
+        flex: 1;
+        margin-right: 8px;
+    }
+
+    .ai-user-msg, .ai-bot-msg {
+        margin-bottom: 8px;
+    }
+
+    .ai-user-msg b {
+        color: #007bff;
+    }
+
+    .ai-bot-msg b {
+        color: #198754;
+    }
+</style>
+
+<script>
+    const chatBtn = document.getElementById('ai-chat-button');
+    const chatBox = document.getElementById('ai-chat-box');
+
+    chatBtn.addEventListener('click', () => {
+        chatBox.classList.toggle('open');
+    });
+
+    function sendAiMessage() {
+        const input = document.getElementById('ai-user-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const messages = document.getElementById('ai-chat-messages');
+
+        const userMessage = document.createElement('div');
+        userMessage.className = 'ai-user-msg';
+        userMessage.innerHTML = `<b>Вы:</b> ${message}`;
+        messages.appendChild(userMessage);
+
+        input.value = '';
+
+        fetch('/ai-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const botReply = document.createElement('div');
+            botReply.className = 'ai-bot-msg';
+
+            if (data.reply_html) {
+                botReply.innerHTML = `<b>ИИ:</b> ${data.reply}<br><div class="table-responsive mt-2">${data.reply_html}</div>`;
+            } else {
+                botReply.innerHTML = `<b>ИИ:</b> ${data.reply}`;
+            }
+
+            messages.appendChild(botReply);
+            messages.scrollTop = messages.scrollHeight;
+        })
+        .catch(err => {
+            const botReply = document.createElement('div');
+            botReply.className = 'ai-bot-msg';
+            botReply.innerHTML = `<b>ИИ:</b> Произошла ошибка при обращении к серверу.`;
+            messages.appendChild(botReply);
+            messages.scrollTop = messages.scrollHeight;
+        });
+    }
+</script>
+

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отметить посещаемость</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #f0f4ff, #ffffff);
+            min-height: 100vh;
+        }
+        .logo-header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .logo-header img {
+            height: 70px;
+        }
+        .logo-header h1 {
+            font-size: 1.3rem;
+            color: #003366;
+            margin-top: 10px;
+        }
+        nav {
+            background-color: #003366;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .attendance-box {
+            max-width: 900px;
+            background: white;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        table {
+            width: 100%;
+        }
+        table th, table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        select {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-header">
+            <img src="/static/logoKZ.png" alt="Логотип">
+            <h1>Абай Мырзахметов атындағы Көкшетау университеті</h1>
+        </div>
+    </header>
+
+    <nav>
+        <a href="/teacher/dashboard">Главная</a>
+        <a href="/logout">Выход</a>
+    </nav>
+
+    <main>
+        <div class="attendance-box">
+            <h2>Отметить посещаемость</h2>
+            <form method="post">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr><th>ФИО</th><th>Статус</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.full_name }}</td>
+                        <td>
+                            <select class="form-select" name="status_{{ student.id }}">
+                                <option value="present">Присутствует</option>
+                                <option value="absent">Отсутствует</option>
+                                <option value="sick">Болен</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

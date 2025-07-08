@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сравнение посещаемости</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #f0f4ff, #ffffff);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #003366;
+            text-align: center;
+        }
+        .form-section {
+            background-color: #f9fcff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .btn-compare {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        .btn-compare:hover {
+            background-color: #0056b3;
+        }
+        table {
+            margin-top: 20px;
+        }
+        .table thead {
+            background-color: #003366;
+            color: white;
+        }
+        .match {
+            color: green;
+            font-size: 20px;
+        }
+        .no-match {
+            color: red;
+            font-size: 20px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Сравнение посещаемости преподавателя и аудитора</h2>
+
+        <form method="get" action="/auditor/compare" class="form-section">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Дата:</label>
+                    <input type="date" class="form-control" name="selected_date" value="{{ selected_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Преподаватель:</label>
+                    <select class="form-select" name="teacher_id">
+                        <option value="">Выберите</option>
+                        {% for t in teachers %}
+                            <option value="{{ t.id }}" {% if t.id|string == selected_teacher_id %}selected{% endif %}>{{ t.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Предмет:</label>
+                    <select class="form-select" name="subject_id">
+                        <option value="">Выберите</option>
+                        {% for s in subjects %}
+                            <option value="{{ s.id }}" {% if s.id|string == selected_subject_id %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Группа:</label>
+                    <select class="form-select" name="group_id">
+                        <option value="">Выберите</option>
+                        {% for g in groups %}
+                            <option value="{{ g.id }}" {% if g.id|string == selected_group_id %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-compare px-5">Сравнить</button>
+            </div>
+        </form>
+
+        {% if comparison %}
+            <h3 class="mt-4">Результаты сравнения</h3>
+            <table class="table table-bordered align-middle text-center">
+                <thead>
+                    <tr>
+                        <th>ФИО</th>
+                        <th>Преподаватель</th>
+                        <th>Аудитор</th>
+                        <th>Совпадает</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in comparison %}
+                        <tr>
+                            <td>{{ row.full_name }}</td>
+                            <td>{{ row.teacher_status or '-' }}</td>
+                            <td>{{ row.auditor_status or '-' }}</td>
+                            <td>
+                                {% if row.teacher_status == row.auditor_status and row.teacher_status is not none %}
+                                    <span class="match">✅</span>
+                                {% else %}
+                                    <span class="no-match">❌</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <strong>Процент совпадений:</strong> {{ match_percent }}%
+            </div>
+        {% endif %}
+
+        <a href="/auditor/dashboard" class="back-link">← Вернуться назад</a>
+    </div>
+</body>
+</html>

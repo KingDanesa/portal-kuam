@@ -1,0 +1,66 @@
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Отчет по посещаемости</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #000;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 6px;
+            text-align: left;
+        }
+        th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+    <h2>Отчет по посещаемости</h2>
+    <p><strong>Период:</strong> {{ start_date }} — {{ end_date }}</p>
+    <p><strong>Предмет:</strong> {{ subject_name }}</p>
+    <p><strong>Преподаватель:</strong> {{ teacher_name }}</p>
+    <p><strong>Группа:</strong> {{ group_name }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО Студента</th>
+                <th>Присутствий</th>
+                <th>Отсутствий</th>
+                <th>Всего</th>
+                <th>% посещаемости</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row['full_name'] }}</td>
+                <td>{{ row['present_count'] }}</td>
+                <td>{{ row['absent_count'] }}</td>
+                <td>{{ row['total'] }}</td>
+                <td>{{ "%.2f"|format((row['present_count'] / row['total']) * 100 if row['total'] > 0 else 0) }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p style="margin-top: 15px;"><strong>Общий процент посещаемости группы:</strong> {{ group_average_percent }}%</p>
+</body>
+</html>

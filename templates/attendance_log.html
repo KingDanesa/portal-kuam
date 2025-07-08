@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Журнал посещаемости</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #003366;
+        }
+
+        form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        form label {
+            margin-right: 5px;
+            font-weight: bold;
+        }
+
+        form input, form select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        form button {
+            padding: 8px 16px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #005599;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #003366;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #eef;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Журнал посещаемости</h2>
+
+    <form method="get" action="/attendance-log">
+        <label for="selected_date">Дата:</label>
+        <input type="date" name="selected_date" value="{{ selected_date or '' }}">
+
+        <label for="subject">Предмет:</label>
+        <select name="subject">
+            <option value="all">Все</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.id }}" {% if selected_subject == subject.id|string %}selected{% endif %}>
+                    {{ subject.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Показать журнал</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО студента</th>
+                <th>Предмет</th>
+                <th>Дата</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance %}
+            <tr>
+                <td>{{ record.full_name }}</td>
+                <td>{{ record.subject_name }}</td>
+                <td>{{ record.date }}</td>
+                <td>{{ record.status }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">Нет данных для отображения</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
