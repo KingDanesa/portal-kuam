@@ -2,3 +2,4 @@ flask
 gunicorn
 openai
 dateparser
+xhtml2pdf
